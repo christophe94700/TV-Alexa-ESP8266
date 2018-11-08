@@ -14,7 +14,7 @@ void conf_serie() {
       Info_reboot();
     }
     if (valeur == "eeprom") {
-      InitEeprom();
+      InitEeprom(1);
     }
     if (valeur == "alexa1") {
       Serial.println("Modification du nom du périphérique");

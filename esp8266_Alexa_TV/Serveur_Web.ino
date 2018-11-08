@@ -32,7 +32,9 @@ String getContentType(String filename) { // convert the file extension to the MI
 
 bool handleFileRead(String path) { // send the right file to the client (if it exists)
   Serial.println("handleFileRead: " + path);
+  if ((path == "/parametres.html") and (Admin == 0)) return false;          // Blocage de l'accès aux paramètres
   if (path.endsWith("/")) path += "index.html"; // If a folder is requested, send the index file
+  if (path == "/index.html") Admin = 0;                                    // Blocage de l'accès aux paramètres apres retour à la page de base
   String contentType = getContentType(path); // Get the MIME type
   String pathWithGz = path + ".gz";
   if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) { // If the file exists, either as a compressed archive, or normal
@@ -122,6 +124,25 @@ void srv_handle_set() {
       EcritureStringEeprom((&server.arg(i)[0]), ADRESS_NOM_ALEXA2, 32);
       Serial.println("Configuration Nom périphérique Alexa: " + LectureStringEeprom(ADRESS_NOM_ALEXA2, 32));
     }
+     // Mot de passe pour OTA et paramètrage
+    if (server.argName(i) == "mdp") {
+      WIFI_SSID_G = (&server.arg(i)[0]);
+      EcritureStringEeprom((&server.arg(i)[0]), ADRESS_PASSWORD, 32);
+      Serial.println("Mot de passe pour OTA et paramètrage: " + LectureStringEeprom(ADRESS_PASSWORD, 32));
+    }
+    // Validation du mot de passe pour accès aux paramètres
+    if (server.argName(i) == "login") {
+      WIFI_SSID_G = (&server.arg(i)[0]);
+      //EcritureStringEeprom((&server.arg(i)[0]),ADRESS_PASSWORD,32);
+      if (LectureStringEeprom(ADRESS_PASSWORD, 32) == WIFI_SSID_G) {
+        Serial.println("Accès aux paramètres validés");
+        Admin = true;
+      } else {
+        Serial.println("Accès aux paramètres invalidés");
+        Admin = false;
+      }
+
+    }
   }
   server.send(200, "text/plain", "OK");
 }
@@ -172,4 +193,3 @@ void srv_handle_etat() {
     }
   }
 }
-

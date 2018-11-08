@@ -1,9 +1,11 @@
 #include <ESP8266WiFi.h>                    //Inclusion bibliothèque gestion du WIFI de l'ESP8266
+#include <ESP8266mDNS.h>                    // Inclusion bibliothèque mDNS
 #include <Espalexa.h>                       //Inclusion bibliothèque pour commande avec Alexa Amazone
 #include <ESP8266WebServer.h>               //Inclusion bibliothèque gestion du serveur web de l'ESP8266
 #include <EEPROM.h>                         //Inclusion bibliothèque gestion de l'EEPROM
 #include <FS.h>                             //Inclusion bibliothèque SPIFFS
 #include <WiFiUdp.h>                        //Inclusion bibliothèque pour la gestion de l'User Datagram Protocol
+#include <ArduinoOTA.h>                     //Inclusion bibliothèque pour mise à via le WIFI
 #include <NTPClient.h>                      //Inclusion bibliothèque gestion serveur NTP
 #include <ESP8266Ping.h>                    //Inclusion bibliothèque pour le ping et modification de byte count = 1 dans la bibliothèque
 #include <StringSplitter.h>                 //Inclusion bibliothèque pour création d'un tableau depuis chaine avec séparateur Modifier nbrs MAX 5 => 10
@@ -26,8 +28,7 @@ unsigned long Twifiap = 0;                   // Variable temps d'utilisation du 
 unsigned long last_wifi_check_time = 0;
 String getContentType(String filename);     // convert the file extension to the MIME type
 bool handleFileRead(String path);           // send the right file to the client (if it exists)
-//IR
-uint16_t rawData[67] = {4662, 4322,  686, 438,  652, 468,  622, 494,  598, 536,  562, 1676,  552, 566,  556, 560,  556, 560,  558, 558,  558, 558,  552, 564,  558, 560,  558, 1676,  560, 556,  558, 560,  556, 560,  560, 558,  552, 1684,  556, 1676,  562, 1676,  558, 1676,  556, 560,  564, 554,  560, 556,  562, 1674,  564, 552,  554, 564,  552, 564,  562, 554,  558, 1676,  554, 1680,  562, 1672,  562};  // SAMSUNG 8087887
+bool Admin = 0;                             // 0= pas de login 1=login validé
 
 //Instance des objets
 ESP8266WebServer server(HTTP_PORT);
@@ -50,7 +51,7 @@ IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
 void setup() {
   EEPROM.begin(512);                                //Initialise zone mémoire dans eeprom
   irsend.begin();                                   //Initialisation pour l'envois en IR
-  InitEeprom();                                     //Initialisation EEprom apres effacement
+  InitEeprom(0);                                     //Initialisation EEprom apres effacement
   Serial.begin(115200);                             //Vitesse liaison série 115200
   Info_reboot();                                    // Information sur l'origine du reboot
   Info_ESP();                                       // Information esp8266
@@ -62,7 +63,12 @@ void setup() {
   init_server();                                                  // Initialisation des serveurs
   Date_Heure();                                                   // initialisation de la date et de l'heure
   Twifiap = millis();                                             // Initialisation du temps en mode AP
-  if (WiFi.status() == WL_CONNECTED) InitAlexa();                 // Initialisation d'Alexa
+ if (WiFi.status() == WL_CONNECTED) {                            // Initialisation si connexion WIFI
+    InitAlexa();                                                  // Initialisation d'Alexa
+    ArduinoOTA.setHostname(("MyTV"+ String(ESP.getChipId())).c_str());           // Nom du module pour mise à jour et pour le mDNS
+    ArduinoOTA.setPassword((LectureStringEeprom(ADRESS_PASSWORD,32)).c_str());   // Mot de passe pour mise à jour
+    ArduinoOTA.begin();                                                           // Initialisation de l'OTA
+  }
 }
 
 
@@ -70,12 +76,12 @@ void loop() {
   conf_serie();                                        // Configuration via liaison série
   server.handleClient();
   delay(1);
-
   if (WiFi.status() == WL_CONNECTED) {                 // mode sur réseau WIFI avec routeur
     Date_Heure();
     wifi_verif();
     espalexa.loop();
     Twifiap = millis();
+    ArduinoOTA.handle();
   } else {
     if (millis() - Twifiap > WIFIAP_TIMEOUT) {        // Temps en mode AP
       raz();
@@ -91,4 +97,3 @@ void raz() {
   Serial.println("+++ Redémarrage du module +++");        //Saut de ligne
   ESP.restart();           // Redémarrage
 }
-

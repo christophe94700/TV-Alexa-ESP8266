@@ -1,6 +1,4 @@
 
-
-
 void Ir_Envoi_On() {
   Serial.println("HIFI");
   irsend.sendSAMSUNG(0x8087887, 32);
@@ -61,4 +59,3 @@ Serial.println("HIFI");
   irsend.sendSAMSUNG(0x8087887, 32);
   delay(200);
 }
-

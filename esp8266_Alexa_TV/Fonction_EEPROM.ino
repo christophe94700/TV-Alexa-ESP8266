@@ -34,19 +34,18 @@ void EffaceWifiEeprom() {
 }
 
 // Initialisation des valeurs dans EEPROM
-void InitEeprom() {
+void InitEeprom(bool Force) {
   int8_t tmp = 0;
   tmp = EEPROM.read(ADRESS_EEPROM_INIT);
-  if (tmp != 20) {
+  if ((tmp != 20) or (Force == 1)) {
     // Efface EEPROM
-    for (int i = 0; i < 512; ++i) {
+    for (int i = 0; i < EEPROM.length(); ++i) {
       EEPROM.write(i, 0);
     }
-    EcritureStringEeprom("Alexa"+String(ESP.getChipId()), ADRESS_NOM_ALEXA1, 32);  // Defaut paramètres Alexa
+    EcritureStringEeprom("Alexa" + String(ESP.getChipId()), ADRESS_NOM_ALEXA1, 32); // Defaut paramètres Alexa
+    EcritureStringEeprom("admin", ADRESS_PASSWORD, 32);  // Defaut mots de passe mise à jour OTA
     EEPROM.write(ADRESS_EEPROM_INIT, 20);
     EEPROM.commit();
   }
   Serial.println("+++ Valeur par défaut EEPROM +++");        //Saut de ligne
 }
-
-

@@ -27,6 +27,7 @@
   THE SOFTWARE.
  * 
  * Version:
- * V1.00 Intiale version
- * 
+ * V1.0.0 15/10/2018 Intiale version
+ * V1.0.1 07/11/2018 Ajout fonction OTA, Ajout fonction mDNS, mot passe pour mise à jour "admin" et accès aux paramètres. 
+ * EEPROM 1M avec 64KO pour SPIFFS pour mise à jour via OTA 
  */
