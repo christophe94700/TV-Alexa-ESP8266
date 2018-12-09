@@ -32,4 +32,6 @@ etat('wifi','mask','mask');
 etat('conf','gmt','gmt');
 etat('conf','alexa1','alexa1');
 etat('conf','alexa2','alexa2');
+etat('ir','ir1','ir1');
+etat('ir','ir2','ir2');
     });  

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang='fr'>
+	<head>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+		<meta name='viewport' content='width=device-width' />
+		<title>Alexa TV périphérique 2</title>
+		<script type='text/javascript' src='IR.js'></script>
+		<link href="style.css" rel="stylesheet" media="all" type="text/css"> 
+		<link href="IR.css" rel="stylesheet" media="all" type="text/css"> 
+	</head>
+	<body>
+		<h1>ALEXA TV périphérique 2</h1>
+		</br>
+		<h4>Code IR</h4> <h4 id="ircode">NEC Code: 0x61D6AA55 Bit: 32</h4><br />
+		<div id='controls'>
+			<table id="table">
+				<tr>
+					<td id="ir">IR 20</td>
+					<td id="20">
+						<input type="text" id="IR 200" value="" style="text-align:center" title="Code IR"/>
+						<input type="text"  id="IR 201" value="" title="Protocole"/>
+						<input type="text"  id="IR 202" value="" title="Nbit"/>
+						<input type="number" id="IR 203" value="3" min="0" max="5" style="text-align:center" title="Répétition IR"/>
+						<input list="marche"  id="IR 204" onclick="(this.value='')" title="Marche/Arrêt"/>
+					</td>
+				</tr>
+				<tr>
+					<td id="ir">IR 21</td>
+					<td id="21">
+						<input type="Text" id="IR 210" value="" style="text-align:center" title="Code IR"/>
+						<input type="text"  id="IR 211" value="" title="Protocole"/>
+						<input type="text"  id="IR 212" value="" title="Nbit"/>
+						<input type="number" id="IR 213" value="3" min="0" max="5" style="text-align:center" title="Répétition IR"/>
+						<input list="marche"  id="IR 214" onclick="(this.value='')" title="Marche/Arrêt"/>
+					</td>
+				</tr>
+				<tr>
+					<td id="ir">IR 22</td>
+					<td id="22">
+						<input type="text" id="IR 220" value="" style="text-align:center" title="Code IR"/>
+						<input type="text"  id="IR 221" value="" title="Protocole"/>
+						<input type="text"  id="IR 222" value="" title="Nbit"/>
+						<input type="number" id="IR 223" value="3" min="0" max="5" style="text-align:center" title="Répétition IR"/>
+						<input list="marche"  id="IR 224" onclick="(this.value='')" title="Marche/Arrêt"/>
+					</td>
+				</tr>
+				<tr>
+					<td id="ir">IR 23</td>
+					<td id="23">
+						<input type="text" id="IR 230" value="" style="text-align:center" title="Code IR"/>
+						<input type="text"  id="IR 231" value=""title="Protocole"/>
+						<input type="text"  id="IR 232" value="" title="Nbit"/>
+						<input type="number" id="IR 233" value="3" min="0" max="5" style="text-align:center" title="Répétition IR"/>
+						<input list="marche"  id="IR 234" onclick="(this.value='')" title="Marche/Arrêt"/>
+					</td>
+				</tr>
+				<tr>
+					<td id="ir">IR 24</td>
+					<td id="24">
+						<input type="text" id="IR 240" value="" style="text-align:center" title="Code IR"/>
+						<input type="text"  id="IR 241" value="" title="Protocole"/>
+						<input type="text"  id="IR 242" value="" title="Nbit"/>
+						<input type="number" id="IR 243" value="3" min="0" max="5" style="text-align:center" title="Répétition IR"/>
+						<input list="marche"  id="IR 244" onclick="(this.value='')" title="Marche/Arrêt"/>
+					</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<a href="#" id="config">Valider</a>
+			<br />
+			<a href="parametres.html" id="config">Sortir</a>
+			<datalist id="marche">
+				<option value="OnOff">
+				<option value="On">
+				<option value="Off">
+			</datalist>
+				</body>
+			</html>
+				

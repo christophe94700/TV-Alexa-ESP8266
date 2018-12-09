@@ -14,6 +14,7 @@
 #include <IRremoteESP8266.h>                //Inclusion bibliothèque gestion Infrarouge
 #include <IRsend.h>                         //Inclusion bibliothèque gestion Emission Infrarouge
 #include <IRrecv.h>                         //Inclusion bibliothèque gestion Reception Infrarouge
+#include <StringSplitter.h>                 //Inclusion bibliothèque pour création d'un tableau depuis chaine avec séparateur Modifier nbrs MAX 5 => 10
 
 
 extern "C" {
@@ -22,6 +23,7 @@ extern "C" {
 
 // Variables globales
 String DateHeure = "";                      // Variable pour gestion de la date et de l'heure
+String IrCode = "";                      // Variable pour gestion de la date et de l'heure
 uint8_t ReseauOut = 0;                      // Variable Compteur Nombre de de perte du wifi
 String WIFI_SSID_G = "";                    // Variable globale pour configuration SSID client Web
 unsigned long Twifiap = 0;                   // Variable temps d'utilisation du mode WIFI AP
@@ -38,20 +40,23 @@ WiFiUDP ntpUDP;
 // Vous pouvez spécifier le nom du serveur de temps et le décalage en secondes, peut être
 // modifié plus tard avec setTimeOffset (). De plus, vous pouvez spécifier l'
 // intervalle de mise à jour en millisecondes, avec setUpdateInterval ().
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 3600, 3600000);
 
 void IrChange1(uint8_t Ir1);              // Retour des informations
 void IrChange2(uint8_t Ir2);              // Retour des informations
 Espalexa espalexa;
+// Liste des code IR
+const char *pointer[] PROGMEM = { "UNKNOWN", "UNUSED", "RC5", "RC6", "NEC", "SONY", "PANASONIC", "JVC", "SAMSUNG", "WHYNTER", "AIWA_RC_T501", "LG", "SANYO", "MITSUBISHI", "DISH", "SHARP", "COOLIX", "DAIKIN", "DENON", "KELVINATOR", "SHERWOOD", "MITSUBISHI_AC", "RCMM", "SANYO_LC7461", "RC5X", "GREE", "PRONTO", "NEC_LIKE", "ARGO", "TROTEC", "NIKAI", "RAW", "GLOBALCACHE", "TOSHIBA_AC", "FUJITSU_AC", "MIDEA", "MAGIQUEST", "LASERTAG", "CARRIER_AC", "HAIER_AC", "MITSUBISHI2", "HITACHI_AC", "HITACHI_AC1", "HITACHI_AC2", "GICABLE", "HAIER_AC_YRW02", "WHIRLPOOL_AC", "SAMSUNG_AC", "LUTRON", "ELECTRA_AC", "PANASONIC_AC", "PIONEER", "LG2", "MWM"};
 
-const uint8_t kIrLed = 0;  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
-
-IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
+IRsend irsend(EmIrLed);  // Set the GPIO to be used to sending the message.
+IRrecv irrecv(ReIrLed);
+decode_results results;
 
 void setup() {
   EEPROM.begin(512);                                //Initialise zone mémoire dans eeprom
   irsend.begin();                                   //Initialisation pour l'envois en IR
-  InitEeprom(0);                                     //Initialisation EEprom apres effacement
+  irrecv.enableIRIn();                              //Démarrage pour la réception signaux Infra rouge
+  InitEeprom(0);                                    //Initialisation EEprom apres effacement
   Serial.begin(115200);                             //Vitesse liaison série 115200
   Info_reboot();                                    // Information sur l'origine du reboot
   Info_ESP();                                       // Information esp8266
@@ -63,10 +68,13 @@ void setup() {
   init_server();                                                  // Initialisation des serveurs
   Date_Heure();                                                   // initialisation de la date et de l'heure
   Twifiap = millis();                                             // Initialisation du temps en mode AP
- if (WiFi.status() == WL_CONNECTED) {                            // Initialisation si connexion WIFI
+  if (WiFi.status() == WL_CONNECTED) {                            // Initialisation si connexion WIFI
     InitAlexa();                                                  // Initialisation d'Alexa
-    ArduinoOTA.setHostname(("MyTV"+ String(ESP.getChipId())).c_str());           // Nom du module pour mise à jour et pour le mDNS
-    ArduinoOTA.setPassword((LectureStringEeprom(ADRESS_PASSWORD,32)).c_str());   // Mot de passe pour mise à jour
+    ArduinoOTA.setHostname(("MyTV" + String(ESP.getChipId())).c_str());          // Nom du module pour mise à jour et pour le mDNS
+    ArduinoOTA.setPassword((LectureStringEeprom(ADRESS_PASSWORD, 32)).c_str());  // Mot de passe pour mise à jour
+    ArduinoOTA.onEnd([]() {                                                      // Effacement EEPROM après mise à jour
+      InitEeprom(1);
+    });
     ArduinoOTA.begin();                                                           // Initialisation de l'OTA
   }
 }
@@ -88,6 +96,11 @@ void loop() {
     }
   }
 
+  // Decodage IR
+  if (irrecv.decode(&results)) {
+    dump(&results);
+    irrecv.resume();  // Receive the next value
+  }
 }
 
 // Raz esp8266

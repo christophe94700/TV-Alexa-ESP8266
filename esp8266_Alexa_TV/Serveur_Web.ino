@@ -14,6 +14,7 @@ void init_server() {
   });
   server.on("/set", srv_handle_set);                    // Serveur lecture des commandes depuis client
   server.on("/DateHeure", srv_handle_dateheure);        // Serveur pour affichage de la date et l'heure
+  server.on("/IrCode", srv_handle_ircode);              // Serveur pour affichage du code IR
   server.on("/Etat", srv_handle_etat);                  // Serveur pour affichage des paramètres
   server.begin();                                       // Démarrage du serveur web
   Serial.println("Serveur HTTP démarré.");
@@ -33,6 +34,9 @@ String getContentType(String filename) { // convert the file extension to the MI
 bool handleFileRead(String path) { // send the right file to the client (if it exists)
   Serial.println("handleFileRead: " + path);
   if ((path == "/parametres.html") and (Admin == 0)) return false;          // Blocage de l'accès aux paramètres
+  for (int i = 1; i < 6; i++) {
+    if ((path == ("/device" + String(i) + ".html")) and (Admin == 0)) return false; // Blocage de l'accès à la configuration des devices
+  }
   if (path.endsWith("/")) path += "index.html"; // If a folder is requested, send the index file
   if (path == "/index.html") Admin = 0;                                    // Blocage de l'accès aux paramètres apres retour à la page de base
   String contentType = getContentType(path); // Get the MIME type
@@ -53,6 +57,10 @@ bool handleFileRead(String path) { // send the right file to the client (if it e
 
 void srv_handle_dateheure() {
   server.send(200, "text/plain", DateHeure);
+}
+
+void srv_handle_ircode() {
+  server.send(200, "text/plain", IrCode);
 }
 
 
@@ -124,7 +132,7 @@ void srv_handle_set() {
       EcritureStringEeprom((&server.arg(i)[0]), ADRESS_NOM_ALEXA2, 32);
       Serial.println("Configuration Nom périphérique Alexa: " + LectureStringEeprom(ADRESS_NOM_ALEXA2, 32));
     }
-     // Mot de passe pour OTA et paramètrage
+    // Mot de passe pour OTA et paramètrage
     if (server.argName(i) == "mdp") {
       WIFI_SSID_G = (&server.arg(i)[0]);
       EcritureStringEeprom((&server.arg(i)[0]), ADRESS_PASSWORD, 32);
@@ -140,6 +148,31 @@ void srv_handle_set() {
       } else {
         Serial.println("Accès aux paramètres invalidés");
         Admin = false;
+      }
+    }
+    // Paramètrage IR
+    if (server.argName(i) == "ircode") {
+      Active_IrCode(String(&server.arg(i)[0]));
+    }
+
+    // Commande IR1 et IR2
+    if (server.argName(i) == "device1") {                               // Marche arrêt IR1
+      WIFI_SSID_G = (&server.arg(i)[0]);
+      if (WIFI_SSID_G == "on") {
+        Ir_Envoi_On(1);
+      }
+      if (WIFI_SSID_G == "off") {
+        Ir_Envoi_Off(1);
+      }
+
+    }
+    if (server.argName(i) == "device2") {                                // Marche arrêt IR2
+      WIFI_SSID_G = (&server.arg(i)[0]);
+      if (WIFI_SSID_G == "on") {
+        Ir_Envoi_On(2);
+      }
+      if (WIFI_SSID_G == "off") {
+        Ir_Envoi_Off(2);
       }
 
     }
@@ -189,6 +222,16 @@ void srv_handle_etat() {
       }
       if (valeur == "alexa2") {
         server.send(200, "text/plain", (LectureStringEeprom(ADRESS_NOM_ALEXA2, 32)));       // Lecture valeur nom alexa
+      }
+    }
+    // Etat conf IR Code
+    if (server.argName(i) == "ir") {
+      valeur = (&server.arg(i)[0]);
+      if (valeur == "ir1") {
+        server.send(200, "text/plain", EtatIr(0));        // Lecture Code IR
+      }
+      if (valeur == "ir2") {
+        server.send(200, "text/plain", EtatIr(1));        // Lecture Code IR
       }
     }
   }

@@ -1,61 +1,180 @@
 
-void Ir_Envoi_On() {
-  Serial.println("HIFI");
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(50);
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(50);
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(200);
-  Serial.println("BoxTV");
-  irsend.sendNEC(0xFF9A65, 32);
-  delay(50);
-  irsend.sendNEC(0xFF9A65, 32);
-  delay(50);
-  irsend.sendNEC(0xFF9A65, 32);
+void Ir_Envoi_On(uint8_t device) {
+  if (device == 1) {
+    for (int i = 0; i < 5; i++) {
+
+      uint64_t code  = (EEPROMReadlong(ADRESS_IR_10 + i * IR_Mots, 4));
+      uint8_t proto = ((EEPROM.read(ADRESS_IR_10 + i * IR_Mots + 4))-1);
+      uint8_t nbit = (EEPROM.read(ADRESS_IR_10 + i * IR_Mots + 5));
+      uint8_t rep  = (EEPROM.read(ADRESS_IR_10 + i * IR_Mots  + 6));
+      uint8_t cde  = (EEPROM.read(ADRESS_IR_10 + i * IR_Mots  + 7));
+      Serial.println("Device 1 IRSend: ");
+      if ((cde == 0)or (cde == 1))  {
+        delay(200);
+        for (int l = 0; l <= rep; l++) {
+          IRSendProto(proto,code,nbit);
+        }
+      }
+    }
+  }
+  if (device == 2) {
+    for (int i = 0; i < 5; i++) {
+      uint64_t code  = (EEPROMReadlong(ADRESS_IR_20 + i * IR_Mots, 4));
+      uint8_t proto = ((EEPROM.read(ADRESS_IR_20 + i * IR_Mots + 4))-1);
+      uint8_t nbit = (EEPROM.read(ADRESS_IR_20 + i * IR_Mots + 5));
+      uint8_t rep  = (EEPROM.read(ADRESS_IR_20 + i * IR_Mots  + 6));
+      uint8_t cde  = (EEPROM.read(ADRESS_IR_20 + i * IR_Mots  + 7));
+      Serial.println("Device 2 IRSend: ");
+      if ((cde == 0)or (cde == 1)) {
+        delay(200);
+        for (int l = 0; l <= rep; l++) {
+          IRSendProto(proto,code,nbit);
+        }
+      }
+    }
+  }
 }
 
-void Ir_Envoi_Off() {
-  Serial.println("HIFI");
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(50);
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(50);
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(200);
-  Serial.println("BoxTV");
-  irsend.sendNEC(0xFF9A65, 32);
-  delay(50);
-  irsend.sendNEC(0xFF9A65, 32);
-  delay(50);
-  irsend.sendNEC(0xFF9A65, 32);
-  delay(200);
-  Serial.println("Video");
-  irsend.sendNEC(0x61D650AF, 32);
-  delay(50);
-  irsend.sendNEC(0x61D650AF, 32);
-  delay(50);
-  irsend.sendNEC(0x61D650AF, 32);
-}
-void Ir_Envoi_vol(uint8_t vol) {
-  Serial.println("HIFI Volume");
-  for (int i = 0; i <= 40; i++) {
-    irsend.sendSAMSUNG(0x8086897, 32);
-    delay(100);
+void Ir_Envoi_Off(uint8_t device) {
+    if (device == 1) {
+    for (int i = 0; i < 5; i++) {
+
+      uint64_t code  = (EEPROMReadlong(ADRESS_IR_10 + i * IR_Mots, 4));
+      uint8_t proto = ((EEPROM.read(ADRESS_IR_10 + i * IR_Mots + 4))-1);
+      uint8_t nbit = (EEPROM.read(ADRESS_IR_10 + i * IR_Mots + 5));
+      uint8_t rep  = (EEPROM.read(ADRESS_IR_10 + i * IR_Mots  + 6));
+      uint8_t cde  = (EEPROM.read(ADRESS_IR_10 + i * IR_Mots  + 7));
+      Serial.println("Device 1 IRSend: ");
+      if ((cde == 0)or (cde == 2))  {
+        delay(200);
+        for (int l = 0; l <= rep; l++) {
+          IRSendProto(proto,code,nbit);
+        }
+      }
+    }
   }
-  vol = ((vol / 255)) * 100;
-  if (vol > 25) vol = 25;
-  for (int i = 0; i <= vol; i++) {
-  irsend.sendSAMSUNG(0x808C837, 32);
-    delay(100);
+  if (device == 2) {
+    for (int i = 0; i < 5; i++) {
+      uint64_t code  = (EEPROMReadlong(ADRESS_IR_20 + i * IR_Mots, 4));
+      uint8_t proto = ((EEPROM.read(ADRESS_IR_20 + i * IR_Mots + 4))-1);
+      uint8_t nbit = (EEPROM.read(ADRESS_IR_20 + i * IR_Mots + 5));
+      uint8_t rep  = (EEPROM.read(ADRESS_IR_20 + i * IR_Mots  + 6));
+      uint8_t cde  = (EEPROM.read(ADRESS_IR_20 + i * IR_Mots  + 7));
+      Serial.println("Device 2 IRSend: ");
+      if ((cde == 0)or (cde == 2)) {
+        delay(200);
+        for (int l = 0; l <= rep; l++) {
+          IRSendProto(proto,code,nbit);
+        }
+      }
+    }
   }
 }
-void Ir_Envoi_Off_HIFI(){
-Serial.println("HIFI");
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(50);
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(50);
-  irsend.sendSAMSUNG(0x8087887, 32);
-  delay(200);
+
+void IRSendProto(uint8_t proto, uint64_t code, uint8_t nbit) {
+  // Make the appropriate call for the protocol type.
+  switch (proto) {
+    delay(50);
+    case NEC:
+      irsend.sendNEC(code, nbit);
+      break;
+
+    case SAMSUNG:
+      irsend.sendSAMSUNG(code, nbit);
+      break;
+
+
+    default:
+
+      break;
+  }
+
+}
+
+
+void dump(decode_results *results) {
+  // Dumps out the decode_results structure.
+  // Call this after IRrecv::decode()
+  uint16_t count = results->rawlen;
+
+
+  if ((results->decode_type == UNKNOWN) or (results->bits == 0) ) {
+    return;
+  } else {
+    Serial.print("Decodage ");
+    Serial.print(pointer[(results->decode_type) + 1]);
+    Serial.print(":");
+    IrCode = (pointer[(results->decode_type) + 1]);
+    IrCode = IrCode + " ";
+  }
+
+  unsigned long long1 = (unsigned long)(((results->value) & 0xFFFF0000) >> 16 );
+  unsigned long long2 = (unsigned long)(((results->value) & 0x0000FFFF));
+
+  String hex = String(long1, HEX) + String(long2, HEX); // six octets
+  hex.toUpperCase();
+
+  Serial.print(hex);
+  Serial.print(" (");
+  Serial.print(results->bits, DEC);
+  Serial.println(" bits)");
+  IrCode = IrCode + "Code: 0x" + hex + " Bit: " + String(results->bits, DEC);
+
+}
+
+void Active_IrCode(String ParaIr) {
+  // Lecture des paramètres
+  StringSplitter *splitter = new StringSplitter(ParaIr, ',', Nbrs_Para_IR);  // Initialisation de la classe avec x paramètres
+  int itemCount = splitter->getItemCount();
+  String para[itemCount];
+  Serial.print("Paramètres IR :");
+  for (int i = 0; i < itemCount; i++) {
+    String item = splitter->getItemAtIndex(i);
+    Serial.println("Valeur " + String(i) + ": " + (item) + " ");
+    para[i] = item;
+  }
+  int NumIr = (para[0]).toInt() - 10;
+  if (NumIr > 4) NumIr = NumIr - 5;
+  uint32_t tmp  = (uint32_t) strtol(para[1].c_str(), NULL, 16);
+  Serial.print("Code: ");
+  Serial.print(String(tmp));
+  EEPROMWritelong(ADRESS_IR_10 + NumIr * IR_Mots, tmp, 4); // Sauvegarde du code ID 32 Bits
+  Serial.print("Pro: ");
+  Serial.print(String(ValPro(para[2])));
+  Serial.print("Nbit: ");
+  Serial.print(String(para[3]).toInt());
+  Serial.print(" Rep: ");
+  Serial.println(String(para[4]).toInt());
+  Serial.print(" Mode: ");
+  Serial.println(String(para[5]).toInt());
+  EEPROM.write(ADRESS_IR_10 + 4 + NumIr * IR_Mots, (ValPro(para[2])));
+  EEPROM.write(ADRESS_IR_10 + 5 + NumIr * IR_Mots, (para[3]).toInt());
+  EEPROM.write(ADRESS_IR_10 + 6 + NumIr * IR_Mots, (para[4]).toInt());
+  EEPROM.write(ADRESS_IR_10 + 7 + NumIr * IR_Mots, (para[5]).toInt());
+  EEPROM.commit();
+}
+
+// Renvois le nombre du protocole
+int ValPro(String valeur) {
+  for (int i = 0; i < 54; i++) {
+    //Serial.println(pointer[i]);
+    if (valeur == (pointer[i])) {
+      return i;
+    }
+  }
+}
+
+String EtatIr(uint8_t Ir) {
+  String texte;
+  texte = "Dev: " + String(Ir) + "</BR>";
+  for (int l = 0; l < 5; l++) {
+    texte = texte + " IR: " + String(l);
+    texte = texte + " Code : " + String(EEPROMReadlong(ADRESS_IR_10 + l * IR_Mots + Ir * IR_Mots * 5, 4), HEX);
+    texte = texte + " Prot : " + String(EEPROM.read(ADRESS_IR_10 + l * IR_Mots + Ir * IR_Mots * 5 + 4));
+    texte = texte + " Nbit : " + String(EEPROM.read(ADRESS_IR_10 + l * IR_Mots + Ir * IR_Mots * 5 + 5));
+    texte = texte + " Rep : " + String(EEPROM.read(ADRESS_IR_10 + l * IR_Mots + Ir * IR_Mots * 5 + 6));
+    texte = texte + " Mode : " + String(EEPROM.read(ADRESS_IR_10 + l * IR_Mots + Ir * IR_Mots * 5 + 7)) + "</BR>";
+
+  }
+  return texte;
 }
