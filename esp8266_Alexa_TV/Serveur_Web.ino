@@ -79,18 +79,18 @@ void srv_handle_set() {
     }
     // WIFI SSID
     if (server.argName(i) == "ssid") {
-      WIFI_SSID_G = (&server.arg(i)[0]);
+      WIFI_SSID_G = (server.arg(i).c_str());
       Serial.println("Configuration Client Web SSID: " + WIFI_SSID_G);
     }
     // WIFI mot de passe
     if (server.argName(i) == "password") {
-      WIFI_PASSWORD = (&server.arg(i)[0]);
+      WIFI_PASSWORD = (server.arg(i).c_str());
       Serial.println("Configuration Client Web Mdp: " + WIFI_PASSWORD);
       EcritureWifiEeprom(WIFI_SSID_G, WIFI_PASSWORD);
     }
     // WIFI IP FIXE ou DHCP
     if (server.argName(i) == "ipfixe") {
-      WIFI_IP = (&server.arg(i)[0]);
+      WIFI_IP = (server.arg(i).c_str());
       EEPROM.write(ADRESS_RESEAU, 0);
       if (WIFI_IP != "0") {
         EEPROM.write(ADRESS_RESEAU, 1);
@@ -102,7 +102,7 @@ void srv_handle_set() {
     }
     // WIFI IP Passerelle
     if (server.argName(i) == "ippasse") {
-      WIFI_IP = (&server.arg(i)[0]);
+      WIFI_IP = (server.arg(i).c_str());
       Serial.print("Configuration Client Web IP Passerelle: ");
       for (int i = 0; i < 4; ++i)
       {
@@ -114,7 +114,7 @@ void srv_handle_set() {
     }
     // Heure GMT
     if (server.argName(i) == "gmt") {
-      int8_t tmp = (int8_t) strtol(&server.arg(i)[0], NULL, 10);
+      int8_t tmp = (int8_t) strtol(server.arg(i).c_str(), NULL, 10);
       EEPROM.write(ADRESS_GMT, tmp);
       EEPROM.commit();
       tmp = EEPROM.read(ADRESS_GMT);
@@ -123,25 +123,25 @@ void srv_handle_set() {
     }
     // Nom du périphérique pour Alexa Commande Vocal
     if (server.argName(i) == "alexa1") {
-      WIFI_SSID_G = (&server.arg(i)[0]);
-      EcritureStringEeprom((&server.arg(i)[0]), ADRESS_NOM_ALEXA1, 32);
+      WIFI_SSID_G = (server.arg(i).c_str());
+      EcritureStringEeprom((server.arg(i).c_str()), ADRESS_NOM_ALEXA1, 32);
       Serial.println("Configuration Nom périphérique Alexa: " + LectureStringEeprom(ADRESS_NOM_ALEXA1, 32));
     }
     if (server.argName(i) == "alexa2") {
-      WIFI_SSID_G = (&server.arg(i)[0]);
-      EcritureStringEeprom((&server.arg(i)[0]), ADRESS_NOM_ALEXA2, 32);
+      WIFI_SSID_G = (server.arg(i).c_str());
+      EcritureStringEeprom((server.arg(i).c_str()), ADRESS_NOM_ALEXA2, 32);
       Serial.println("Configuration Nom périphérique Alexa: " + LectureStringEeprom(ADRESS_NOM_ALEXA2, 32));
     }
     // Mot de passe pour OTA et paramètrage
     if (server.argName(i) == "mdp") {
-      WIFI_SSID_G = (&server.arg(i)[0]);
-      EcritureStringEeprom((&server.arg(i)[0]), ADRESS_PASSWORD, 32);
+      WIFI_SSID_G = (server.arg(i).c_str());
+      EcritureStringEeprom((server.arg(i).c_str()), ADRESS_PASSWORD, 32);
       Serial.println("Mot de passe pour OTA et paramètrage: " + LectureStringEeprom(ADRESS_PASSWORD, 32));
     }
     // Validation du mot de passe pour accès aux paramètres
     if (server.argName(i) == "login") {
-      WIFI_SSID_G = (&server.arg(i)[0]);
-      //EcritureStringEeprom((&server.arg(i)[0]),ADRESS_PASSWORD,32);
+      WIFI_SSID_G = (server.arg(i).c_str());
+      //EcritureStringEeprom((server.arg(i).c_str()),ADRESS_PASSWORD,32);
       if (LectureStringEeprom(ADRESS_PASSWORD, 32) == WIFI_SSID_G) {
         Serial.println("Accès aux paramètres validés");
         Admin = true;
@@ -152,12 +152,12 @@ void srv_handle_set() {
     }
     // Paramètrage IR
     if (server.argName(i) == "ircode") {
-      Active_IrCode(String(&server.arg(i)[0]));
+      Active_IrCode(String(server.arg(i).c_str()));
     }
 
     // Commande IR1 et IR2
     if (server.argName(i) == "device1") {                               // Marche arrêt IR1
-      WIFI_SSID_G = (&server.arg(i)[0]);
+      WIFI_SSID_G = (server.arg(i).c_str());
       if (WIFI_SSID_G == "on") {
         Ir_Envoi_On(1);
       }
@@ -167,7 +167,7 @@ void srv_handle_set() {
 
     }
     if (server.argName(i) == "device2") {                                // Marche arrêt IR2
-      WIFI_SSID_G = (&server.arg(i)[0]);
+      WIFI_SSID_G = (server.arg(i).c_str());
       if (WIFI_SSID_G == "on") {
         Ir_Envoi_On(2);
       }
@@ -189,7 +189,8 @@ void srv_handle_etat() {
   for (uint8_t i = 0; i < server.args(); i++) {
     // Etat wifi
     if (server.argName(i) == "wifi") {
-      valeur = (&server.arg(i)[0]);
+      //valeur = (server.arg(i).c_str());
+      valeur = (server.arg(i).c_str());
       if (valeur == "ssid") {
         server.send(200, "text/plain", (LectureWifiEeprom(1).c_str()));        // Lecture WIFI SSID
       }
@@ -211,7 +212,7 @@ void srv_handle_etat() {
     }
     // Etat configuration
     if (server.argName(i) == "conf") {
-      valeur = (&server.arg(i)[0]);
+      valeur = (server.arg(i).c_str());
       if (valeur == "gmt") {
         int8_t temp = EEPROM.read(ADRESS_GMT);;
         ltoa(temp, buf, 10);
@@ -226,7 +227,8 @@ void srv_handle_etat() {
     }
     // Etat conf IR Code
     if (server.argName(i) == "ir") {
-      valeur = (&server.arg(i)[0]);
+      //valeur = (server.arg(i).c_str());
+      valeur = (server.arg(i).c_str());
       if (valeur == "ir1") {
         server.send(200, "text/plain", EtatIr(0));        // Lecture Code IR
       }

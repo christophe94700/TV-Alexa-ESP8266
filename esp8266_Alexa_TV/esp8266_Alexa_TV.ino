@@ -14,7 +14,6 @@
 #include <IRremoteESP8266.h>                //Inclusion bibliothèque gestion Infrarouge
 #include <IRsend.h>                         //Inclusion bibliothèque gestion Emission Infrarouge
 #include <IRrecv.h>                         //Inclusion bibliothèque gestion Reception Infrarouge
-#include <StringSplitter.h>                 //Inclusion bibliothèque pour création d'un tableau depuis chaine avec séparateur Modifier nbrs MAX 5 => 10
 
 
 extern "C" {
