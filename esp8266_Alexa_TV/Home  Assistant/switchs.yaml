@@ -1,0 +1,26 @@
+
+- platform: mqtt
+  name: "TV"
+  icon: mdi:projector-screen-outline
+  state_topic: "MyTV3730721/IR1/get"
+  command_topic: "MyTV3730721/IR1/set"
+  value_template: "{{ value_json.state }}"
+  payload_on: '{"state":"ON"}'
+  payload_off: '{"state":"OFF"}'    
+  state_on: "ON"
+  state_off: "OFF"
+  qos: 0
+  retain: true
+
+- platform: mqtt
+  name: "CHAINE"
+  icon: mdi:audio-video
+  state_topic: "MyTV3730721/IR2/get"
+  command_topic: "MyTV3730721/IR2/set"
+  value_template: "{{ value_json.state }}"
+  payload_on: '{"state":"ON"}'
+  payload_off: '{"state":"OFF"}'    
+  state_on: "ON"
+  state_off: "OFF"
+  qos: 0
+  retain: true

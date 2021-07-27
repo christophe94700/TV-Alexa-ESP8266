@@ -9,15 +9,17 @@
 #include <NTPClient.h>                      //Inclusion bibliothèque gestion serveur NTP
 #include <ESP8266Ping.h>                    //Inclusion bibliothèque pour le ping et modification de byte count = 1 dans la bibliothèque
 #include <StringSplitter.h>                 //Inclusion bibliothèque pour création d'un tableau depuis chaine avec séparateur Modifier nbrs MAX 5 => 10
-#include "Definition.h"                     //Inclusion des définitions
 #include <TimeLib.h>                        //Inclusion bibliothèque gestion des fonctionnalités de chronométrage
 #include <IRremoteESP8266.h>                //Inclusion bibliothèque gestion Infrarouge
 #include <IRsend.h>                         //Inclusion bibliothèque gestion Emission Infrarouge
 #include <IRrecv.h>                         //Inclusion bibliothèque gestion Reception Infrarouge
+#include <PubSubClient.h>                   //Inclusion bibliothèque pour la gestion des messages MQTT
+#include <ArduinoJson.h>                    //Inclusion bibliothèque pour la gestion du format Json
 
+#include "Definition.h"                     //Inclusion des définitions
 
 extern "C" {
-#include "user_interface.h"
+    #include "user_interface.h"
 }
 
 // Variables globales
@@ -51,61 +53,66 @@ IRsend irsend(EmIrLed);  // Set the GPIO to be used to sending the message.
 IRrecv irrecv(ReIrLed);
 decode_results results;
 
+WiFiClient espClient;
+PubSubClient client(espClient);
+
 void setup() {
-  EEPROM.begin(512);                                //Initialise zone mémoire dans eeprom
-  irsend.begin();                                   //Initialisation pour l'envois en IR
-  irrecv.enableIRIn();                              //Démarrage pour la réception signaux Infra rouge
-  InitEeprom(0);                                    //Initialisation EEprom apres effacement
-  Serial.begin(115200);                             //Vitesse liaison série 115200
-  Info_reboot();                                    // Information sur l'origine du reboot
-  Info_ESP();                                       // Information esp8266
-  wifi_setup();                                                   // Initialisation du wifi
-  int8_t tmp = EEPROM.read(ADRESS_GMT);                           // Lecture du fuseau horaire
-  if (tmp > -12 && tmp < 13) timeClient.setTimeOffset(3600 * tmp);// Initialisation du fuseau
-  timeClient.begin();                                             // Démarrage du client NTP
-  SPIFFS.begin();                                                 // Démarrage du SPI Flash Files System
-  init_server();                                                  // Initialisation des serveurs
-  Date_Heure();                                                   // initialisation de la date et de l'heure
-  Twifiap = millis();                                             // Initialisation du temps en mode AP
-  if (WiFi.status() == WL_CONNECTED) {                            // Initialisation si connexion WIFI
-    InitAlexa();                                                  // Initialisation d'Alexa
-    ArduinoOTA.setHostname(("MyTV" + String(ESP.getChipId())).c_str());          // Nom du module pour mise à jour et pour le mDNS
-    ArduinoOTA.setPassword((LectureStringEeprom(ADRESS_PASSWORD, 32)).c_str());  // Mot de passe pour mise à jour
-    ArduinoOTA.onEnd([]() {                                                      // Effacement EEPROM après mise à jour
-      InitEeprom(1);
-    });
-    ArduinoOTA.begin();                                                           // Initialisation de l'OTA
-  }
+    EEPROM.begin(512);                                //Initialise zone mémoire dans eeprom
+    irsend.begin();                                   //Initialisation pour l'envois en IR
+    irrecv.enableIRIn();                              //Démarrage pour la réception signaux Infra rouge
+    InitEeprom(0);                                    //Initialisation EEprom apres effacement
+    Serial.begin(115200);                             //Vitesse liaison série 115200
+    Info_reboot();                                    // Information sur l'origine du reboot
+    Info_ESP();                                       // Information esp8266
+    wifi_setup();                                                   // Initialisation du wifi
+    int8_t tmp = EEPROM.read(ADRESS_GMT);                           // Lecture du fuseau horaire
+    if (tmp > -12 && tmp < 13) timeClient.setTimeOffset(3600 * tmp);// Initialisation du fuseau
+    timeClient.begin();                                             // Démarrage du client NTP
+    SPIFFS.begin();                                                 // Démarrage du SPI Flash Files System
+    init_server();                                                  // Initialisation des serveurs
+    Date_Heure();                                                   // initialisation de la date et de l'heure
+    Twifiap = millis();                                             // Initialisation du temps en mode AP
+    if (WiFi.status() == WL_CONNECTED) {                            // Initialisation si connexion WIFI
+        InitAlexa();                                                  // Initialisation d'Alexa
+        Init_Mqtt();                                                  // Initialisation MQTT
+        ArduinoOTA.setHostname(("MyTV" + String(ESP.getChipId())).c_str());          // Nom du module pour mise à jour et pour le mDNS
+        ArduinoOTA.setPassword((LectureStringEeprom(ADRESS_PASSWORD, 32)).c_str());  // Mot de passe pour mise à jour
+        ArduinoOTA.onEnd([]() {                                                      // Effacement EEPROM après mise à jour
+            InitEeprom(1);
+        });
+        ArduinoOTA.begin();                                                           // Initialisation de l'OTA
+    }else {init_server();} 
 }
 
 
 void loop() {
-  conf_serie();                                        // Configuration via liaison série
-  server.handleClient();
-  delay(1);
-  if (WiFi.status() == WL_CONNECTED) {                 // mode sur réseau WIFI avec routeur
-    Date_Heure();
-    wifi_verif();
-    espalexa.loop();
-    Twifiap = millis();
-    ArduinoOTA.handle();
-  } else {
-    if (millis() - Twifiap > WIFIAP_TIMEOUT) {        // Temps en mode AP
-      raz();
+    conf_serie();                                        // Configuration via liaison série
+    delay(1);
+    if (WiFi.status() == WL_CONNECTED) {                 // mode sur réseau WIFI avec routeur
+        Date_Heure();
+        wifi_verif();
+        espalexa.loop();
+        Twifiap = millis();
+        if(EEPROM.read(ADRESS_MQTT_HOST )!=0) Connect_Mqtt();                              //MQTT
+        ArduinoOTA.handle();
+        } else {
+        server.handleClient();                            // Serveurs en mode AP
+        if (millis() - Twifiap > WIFIAP_TIMEOUT) {        // Temps en mode AP
+            raz();
+        }
     }
-  }
-
-  // Decodage IR
-  if (irrecv.decode(&results)) {
-    dump(&results);
-    irrecv.resume();  // Receive the next value
-  }
+    
+    // Decodage IR
+    if (irrecv.decode(&results)) {
+        dump(&results);
+        irrecv.resume();  // Receive the next value
+    }
 }
 
 // Raz esp8266
 void raz() {
-  delay(500);
-  WiFi.mode(WIFI_OFF);     // Arrêt du WIFI
-  Serial.println("+++ Redémarrage du module +++");        //Saut de ligne
-  ESP.restart();           // Redémarrage
+    delay(500);
+    WiFi.mode(WIFI_OFF);     // Arrêt du WIFI
+    Serial.println("+++ Redémarrage du module +++");        //Saut de ligne
+    ESP.restart();           // Redémarrage
 }
