@@ -163,6 +163,8 @@ int ValPro(String valeur) {
             return i;
         }
     }
+ // Gérer d'autres cas ou valeurs si nécessaire.
+    return 0; // Valeur par défaut si nbit n'est ni 4 ni 2.
 }
 
 String EtatIr(uint8_t Ir) {

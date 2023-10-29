@@ -33,8 +33,14 @@ long EEPROMReadlong(long address, int nbit)
     long one = EEPROM.read(address + 3);
     
     //Return the recomposed long by using bitshift.
-    if (nbit == 4) return long((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
-    if (nbit == 2) return uint16_t(((four << 0) & 0xFF) + ((three << 8) & 0xFFFF));
+    if (nbit == 4) {
+      return long((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
+    }
+    if (nbit == 2) {
+      return uint16_t(((four << 0) & 0xFF) + ((three << 8) & 0xFFFF));
+    }
+     // Gérer d'autres cas ou valeurs de nbit si nécessaire.
+    return 0; // Valeur par défaut si nbit n'est ni 4 ni 2.
 }
 
 

@@ -80,7 +80,7 @@ void wifi_verif() {
             Serial.print("Passerelle IP: "); Serial.println(WiFi.gatewayIP());
             Serial.print("Masque sous réseau: "); Serial.println(WiFi.subnetMask());
             Serial.print("Adresse IP DNS: "); Serial.println(WiFi.dnsIP());
-            if (Ping.ping(WiFi.gatewayIP())) {
+            if(pinger.Ping(WiFi.gatewayIP()) == true) {
                 Serial.println("Ping Passerelle OK :)");
                 ReseauOut = 0;
                 } else {
@@ -110,6 +110,8 @@ String LectureWifiEeprom(int a)
     }
     if (a == 1) return String(ssid);
     if (a == 2) return String(password);
+     // Gérer d'autres cas ou valeurs de nbit si nécessaire.
+return ""; // Valeur par défaut
 }
 
 // conversion IP chaine en en valeur numérique
@@ -131,6 +133,3 @@ int IPnum(String valeur, int a) {
     }
     return int(value[a]);
 }
-
-
-

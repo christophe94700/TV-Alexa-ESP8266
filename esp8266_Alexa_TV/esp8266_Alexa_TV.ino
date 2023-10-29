@@ -7,7 +7,7 @@
 #include <WiFiUdp.h>                        //Inclusion bibliothèque pour la gestion de l'User Datagram Protocol
 #include <ArduinoOTA.h>                     //Inclusion bibliothèque pour mise à via le WIFI
 #include <NTPClient.h>                      //Inclusion bibliothèque gestion serveur NTP
-#include <ESP8266Ping.h>                    //Inclusion bibliothèque pour le ping et modification de byte count = 1 dans la bibliothèque
+#include <Pinger.h>                         //Inclusion bibliothèque pour le ping
 #include <StringSplitter.h>                 //Inclusion bibliothèque pour création d'un tableau depuis chaine avec séparateur Modifier nbrs MAX 5 => 10
 #include <TimeLib.h>                        //Inclusion bibliothèque gestion des fonctionnalités de chronométrage
 #include <IRremoteESP8266.h>                //Inclusion bibliothèque gestion Infrarouge
@@ -20,6 +20,7 @@
 
 extern "C" {
     #include "user_interface.h"
+    #include <lwip/icmp.h> // needed for icmp packet definitions
 }
 
 // Variables globales
@@ -55,6 +56,8 @@ decode_results results;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+Pinger pinger;
 
 void setup() {
     EEPROM.begin(512);                                //Initialise zone mémoire dans eeprom

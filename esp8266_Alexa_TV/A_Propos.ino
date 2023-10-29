@@ -33,4 +33,5 @@
  * V1.1.0 09/12/2018 Configuration des codes IR depuis le client WEB pour deux commandes vocales avec alexa
  * V1.1.1 14/04/2021 Mise à jour programme pour compilation avec SDK 2.7.4
  * V1.2.0 25/07/2021 SDK 3.0.3 Intégration à Home Assistant et ajout de MQTT
+ * V1.2.1 29/10/2023 Modification bibliothèque SDK 3.1.2 
  */
